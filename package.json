@@ -1,0 +1,26 @@
+{
+  "name": "bike_system_web_service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://GiovanniL19@github.com/GiovanniL19/bike_system_web_service.git"
+  },
+  "author": "Giovanni Lenguito <giovanni16.gl@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GiovanniL19/bike_system_web_service/issues"
+  },
+  "homepage": "https://github.com/GiovanniL19/bike_system_web_service#readme",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "cradle": "^0.7.1",
+    "express": "^4.15.2",
+    "mongodb": "^2.2.25",
+    "path": "^0.12.7"
+  }
+}
