@@ -8,14 +8,14 @@ var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}
  */
 exports.save = function(req, res){
     var response = {
-        activity: null
+        customer: null
     };
-    req.body.activity.type = "activity";
-    db.save(req.body.activity, function (err, dbRes) {
+    req.body.customer.type = "customer";
+    db.save(req.body.customer, function (err, dbRes) {
         if(err){
             res.status(500).send(err)
         }else{
-            response.activity = dbRes;
+            response.customer = dbRes;
             res.status(201).send(response);
         }
     });
@@ -27,17 +27,17 @@ exports.save = function(req, res){
 exports.get = function(req, res){
     var id = req.param("id");
     var response = {
-        activity: null
+        customer: null
     }
 
     db.get(id, function(err, doc) {
         if (err) {
             res.status(500).send(err);
         } else {
-            response.activity = doc;
-            response.activity.id = doc._id;
+            response.customer = doc.data;
+            response.customer.id = doc._id;
 
-            console.log('Retrieved ' + id + ' material by ID');
+            console.log('Retrieved ' + id + ' customer by ID');
             res.status(200).send(response);
         }
     });
@@ -48,20 +48,21 @@ exports.get = function(req, res){
  */
 exports.getAll = function(req, res){
     var response = {
-        activities: []
+        customers: []
     };
 
-    db.view('activities/activitiesById', {include_docs: true}, function (err, docs) {
+    db.view('customers/customersById', {include_docs: true}, function (err, docs) {
         if(err){
             console.log(err);
             res.status(500).send(err);
         }
         if(docs){
             docs.forEach(function(doc) {
-                var item = doc;
-                item.id = item._id;
-                item.rev = item._rev;
-                response.activities.push(item);
+                var item = doc.data;
+                item.id = doc._id;
+
+                item.rev = doc._rev;
+                response.customers.push(item);
             });
 
             res.status(200).send(response);
@@ -81,8 +82,8 @@ exports.update = function(req, res){
         if (err) {
             res.status(500).send(err);
         } else {
-            req.body.activity.type = "activity";
-            db.save(id, req.body.activity, function(err, dbRes) {
+            req.body.customer.type = "customer";
+            db.save(id, req.body.customer, function(err, dbRes) {
                 if (err) {
                     console.log('Could not update');
                     console.log(err);
@@ -90,11 +91,11 @@ exports.update = function(req, res){
                 } else {
                     console.log(id + ' has been updated');
                     var response = {
-                        activity: null
+                        customer: null
                     };
 
-                    response.activity = req.body.activity;
-                    response.activity.id = id;
+                    response.customer = req.body.customer;
+                    response.customer.id = id;
 
                     res.status(200).send(response);
                 }

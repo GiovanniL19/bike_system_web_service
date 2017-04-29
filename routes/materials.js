@@ -1,8 +1,7 @@
 var	cradle 		= require('cradle'),
     path        = require('path');
 
-var db = new(cradle.Connection)().database('bikesystem');
-
+var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
 
 /*
  * POST
@@ -27,16 +26,29 @@ exports.save = function(req, res){
  */
 exports.get = function(req, res){
     var id = req.param("id");
-    var response = {
-        item: null
-    }
 
     db.get(id, function(err, doc) {
         if (err) {
             res.status(500).send(err);
         } else {
-            response.item = doc;
-            response.item.id = doc._id;
+            var response = {
+                id: id,
+                type: doc.type,
+                barcode: doc.barcode,
+                name: doc.name,
+                description: doc.description,
+                warehouseQuantity: doc.warehouseQuantity,
+                minQuantity: doc.minQuantity,
+                reOrderQuantity: doc.reOrderQuantity,
+                quotedQuantity: doc.quotedQuantity,
+                reservedStock: doc.reservedStock,
+                trade: doc.trade,
+                retail: doc.retail,
+                leadTime: doc.leadTime,
+                group: doc.group,
+                supplier: doc.supplier,
+                bikes: doc.bikes
+            };
 
             console.log('Retrieved ' + id + ' material by ID');
             res.status(200).send(response);
@@ -52,24 +64,78 @@ exports.getAll = function(req, res){
         items: []
     };
 
-    db.view('materials/materialsById', {include_docs: true}, function (err, docs) {
-        if(err){
-            console.log(err);
-            res.status(500).send(err);
-        }
-        if(docs){
-            docs.forEach(function(doc) {
-                var item = doc;
-                item.id = item._id;
-                item.rev = item._rev;
-                response.items.push(item);
-            });
+    if(req.query.itemName != undefined){
+        db.view('materials/materialsByName', {include_docs: true, key: req.query.itemName}, function (err, docs) {
+            if(err){
+                console.log(err);
+                res.status(500).send(err);
+            }
+            if(docs){
 
-            res.status(200).send(response);
-        }else{
-            res.status(200).send([]);
-        }
-    });
+                docs.forEach(function(doc) {
+                    var item = {
+                        id: doc._id,
+                        type: doc.type,
+                        barcode: doc.barcode,
+                        name: doc.name,
+                        description: doc.description,
+                        warehouseQuantity: doc.warehouseQuantity,
+                        minQuantity: doc.minQuantity,
+                        reOrderQuantity: doc.reOrderQuantity,
+                        quotedQuantity: doc.quotedQuantity,
+                        reservedStock: doc.reservedStock,
+                        trade: doc.trade,
+                        retail: doc.retail,
+                        leadTime: doc.leadTime,
+                        group: doc.group,
+                        supplier: doc.supplier,
+                        bikes: doc.bikes
+                    };
+
+                    response.items.push(item);
+                });
+
+                res.status(200).send(response);
+            }else{
+                res.status(200).send([]);
+            }
+        });
+    }else{
+        db.view('materials/materialsById', {include_docs: true}, function (err, docs) {
+            if(err){
+                console.log(err);
+                res.status(500).send(err);
+            }
+            if(docs){
+                docs.forEach(function(doc) {
+                    var item = {
+                        id: doc._id,
+                        type: doc.type,
+                        barcode: doc.barcode,
+                        name: doc.name,
+                        description: doc.description,
+                        warehouseQuantity: doc.warehouseQuantity,
+                        minQuantity: doc.minQuantity,
+                        reOrderQty: doc.reOrderQty,
+                        quotedQuantity: doc.quotedQuantity,
+                        reservedStock: doc.reservedStock,
+                        trade: doc.trade,
+                        retail: doc.retail,
+                        leadTime: doc.leadTime,
+                        group: doc.group,
+                        supplier: doc.supplier,
+                        bikes: doc.bikes
+                    };
+
+                    response.items.push(item);
+                });
+
+                res.status(200).send(response);
+            }else{
+                res.status(200).send([]);
+            }
+        });
+    }
 };
 
 /*
@@ -82,7 +148,7 @@ exports.update = function(req, res){
         if (err) {
             res.status(500).send(err);
         } else {
-            req.body.transaction.type = "material";
+            req.body.item.type = "material";
             db.save(id, req.body.item, function(err, dbRes) {
                 if (err) {
                     console.log('Could not update');

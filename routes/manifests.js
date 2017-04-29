@@ -3,19 +3,20 @@ var	cradle 		= require('cradle'),
 
 var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
 
+
 /*
  * POST
  */
 exports.save = function(req, res){
     var response = {
-        activity: null
+        manifest: null
     };
-    req.body.activity.type = "activity";
-    db.save(req.body.activity, function (err, dbRes) {
+    req.body.manifest.type = "manifest";
+    db.save(req.body.manifest, function (err, dbRes) {
         if(err){
             res.status(500).send(err)
         }else{
-            response.activity = dbRes;
+            response.manifest = dbRes;
             res.status(201).send(response);
         }
     });
@@ -27,17 +28,17 @@ exports.save = function(req, res){
 exports.get = function(req, res){
     var id = req.param("id");
     var response = {
-        activity: null
-    }
+        manifest: null
+    };
 
     db.get(id, function(err, doc) {
         if (err) {
             res.status(500).send(err);
         } else {
-            response.activity = doc;
-            response.activity.id = doc._id;
+            response.manifest = doc.data;
+            response.manifest.id = doc._id;
 
-            console.log('Retrieved ' + id + ' material by ID');
+            console.log('Retrieved ' + id + ' manifest by ID');
             res.status(200).send(response);
         }
     });
@@ -48,20 +49,20 @@ exports.get = function(req, res){
  */
 exports.getAll = function(req, res){
     var response = {
-        activities: []
+        manifests: []
     };
-
-    db.view('activities/activitiesById', {include_docs: true}, function (err, docs) {
+    db.view('manifests/manifestsById', {include_docs: true}, function (err, docs) {
         if(err){
             console.log(err);
             res.status(500).send(err);
         }
         if(docs){
             docs.forEach(function(doc) {
-                var item = doc;
-                item.id = item._id;
-                item.rev = item._rev;
-                response.activities.push(item);
+                var item = doc.data;
+                item.id = doc._id;
+
+                item.rev = doc._rev;
+                response.manifests.push(item);
             });
 
             res.status(200).send(response);
@@ -81,8 +82,12 @@ exports.update = function(req, res){
         if (err) {
             res.status(500).send(err);
         } else {
-            req.body.activity.type = "activity";
-            db.save(id, req.body.activity, function(err, dbRes) {
+
+            var body = {
+                data : req.body.manifest
+            };
+
+            db.save(id, body, function(err, dbRes) {
                 if (err) {
                     console.log('Could not update');
                     console.log(err);
@@ -90,11 +95,11 @@ exports.update = function(req, res){
                 } else {
                     console.log(id + ' has been updated');
                     var response = {
-                        activity: null
+                        manifest: null
                     };
 
-                    response.activity = req.body.activity;
-                    response.activity.id = id;
+                    response.manifest = req.body.manifest;
+                    response.manifest.id = id;
 
                     res.status(200).send(response);
                 }

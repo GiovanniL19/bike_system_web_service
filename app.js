@@ -3,14 +3,18 @@ var express 	   = require('express'),
     path           = require('path'),
     bodyParser     = require('body-parser');
 
-var db = new(cradle.Connection)().database('bikesystem');
+var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
 
 var transactions = require('./routes/transactions.js');
+var quotes = require('./routes/quotes.js');
 var materials = require('./routes/materials.js');
 var suppliers = require('./routes/suppliers.js');
 var activities = require('./routes/activities.js');
 var groups = require('./routes/groups.js');
 var bikes = require('./routes/bikes.js');
+var customers = require('./routes/customers.js');
+var orders = require('./routes/orders.js');
+var manifests = require('./routes/manifests.js');
 
 var port = 3002;
 
@@ -34,12 +38,41 @@ app.get('/',function(req, res){
     res.status(200).send('Welcome to the Bike System Web Service API 1.0.');
 });
 
+//Customers
+app.post('/customers', customers.save);
+app.get('/customers/:id', customers.get);
+app.get('/customers', customers.getAll);
+app.put('/customers/:id', customers.update);
+app.delete('/customers/:id', customers.delete);
+
 //Transactions
 app.post('/transactions', transactions.save);
 app.get('/transactions/:id', transactions.get);
 app.get('/transactions', transactions.getAll);
 app.put('/transactions/:id', transactions.update);
 app.delete('/transactions/:id', transactions.delete);
+app.get('/getProductionOrders', transactions.getProductionOrders);
+
+//Manifests
+app.post('/manifests', manifests.save);
+app.get('/manifests/:id', manifests.get);
+app.get('/manifests', manifests.getAll);
+app.put('/manifests/:id', manifests.update);
+app.delete('/manifests/:id', manifests.delete);
+
+//Orders
+app.post('/orders', orders.save);
+app.get('/orders/:id', orders.get);
+app.get('/orders', orders.getAll);
+app.put('/orders/:id', orders.update);
+app.delete('/orders/:id', orders.delete);
+
+//Quotes
+app.post('/quotes', transactions.save);
+app.get('/quotes/:id', transactions.get);
+app.get('/quotes', transactions.getAll);
+app.put('/quotes/:id', transactions.update);
+app.delete('/quotes/:id', transactions.delete);
 
 //Materials
 app.post('/items', materials.save);

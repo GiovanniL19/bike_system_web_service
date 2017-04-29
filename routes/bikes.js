@@ -1,8 +1,7 @@
 var	cradle 		= require('cradle'),
     path        = require('path');
 
-var db = new(cradle.Connection)().database('bikesystem');
-
+var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
 
 /*
  * POST

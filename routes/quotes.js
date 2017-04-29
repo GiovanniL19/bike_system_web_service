@@ -8,14 +8,14 @@ var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}
  */
 exports.save = function(req, res){
     var response = {
-        activity: null
+        quote: null
     };
-    req.body.activity.type = "activity";
-    db.save(req.body.activity, function (err, dbRes) {
+    req.body.quote.type = "quote";
+    db.save(req.body.quote, function (err, dbRes) {
         if(err){
             res.status(500).send(err)
         }else{
-            response.activity = dbRes;
+            response.quote = dbRes;
             res.status(201).send(response);
         }
     });
@@ -27,17 +27,17 @@ exports.save = function(req, res){
 exports.get = function(req, res){
     var id = req.param("id");
     var response = {
-        activity: null
+        quote: null
     }
 
     db.get(id, function(err, doc) {
         if (err) {
             res.status(500).send(err);
         } else {
-            response.activity = doc;
-            response.activity.id = doc._id;
+            response.quote = doc.data;
+            response.quote.id = doc._id;
 
-            console.log('Retrieved ' + id + ' material by ID');
+            console.log('Retrieved ' + id + ' quote by ID');
             res.status(200).send(response);
         }
     });
@@ -48,20 +48,21 @@ exports.get = function(req, res){
  */
 exports.getAll = function(req, res){
     var response = {
-        activities: []
+        quotes: []
     };
 
-    db.view('activities/activitiesById', {include_docs: true}, function (err, docs) {
+    db.view('quotes/quotesById', {include_docs: true}, function (err, docs) {
         if(err){
             console.log(err);
             res.status(500).send(err);
         }
         if(docs){
             docs.forEach(function(doc) {
-                var item = doc;
-                item.id = item._id;
-                item.rev = item._rev;
-                response.activities.push(item);
+                var item = doc.data;
+                item.id = doc._id;
+
+                item.rev = doc._rev;
+                response.quotes.push(item);
             });
 
             res.status(200).send(response);
@@ -81,8 +82,8 @@ exports.update = function(req, res){
         if (err) {
             res.status(500).send(err);
         } else {
-            req.body.activity.type = "activity";
-            db.save(id, req.body.activity, function(err, dbRes) {
+            req.body.quote.type = "quote";
+            db.save(id, req.body.quote, function(err, dbRes) {
                 if (err) {
                     console.log('Could not update');
                     console.log(err);
@@ -90,11 +91,11 @@ exports.update = function(req, res){
                 } else {
                     console.log(id + ' has been updated');
                     var response = {
-                        activity: null
+                        quote: null
                     };
 
-                    response.activity = req.body.activity;
-                    response.activity.id = id;
+                    response.quote = req.body.quote;
+                    response.quote.id = id;
 
                     res.status(200).send(response);
                 }

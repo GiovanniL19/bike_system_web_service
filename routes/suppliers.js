@@ -1,8 +1,7 @@
 var	cradle 		= require('cradle'),
     path        = require('path');
 
-var db = new(cradle.Connection)().database('bikesystem');
-
+var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
 
 /*
  * POST
@@ -27,26 +26,30 @@ exports.save = function(req, res){
  */
 exports.get = function(req, res){
     var id = req.param("id");
-    var response = {
-        supplier: {}
-    };
 
-    db.view('suppliers/suppliersById', {key: id, include_docs: true}, function (err, docs) {
-        if(err){
-            console.log(err);
+    db.get(id, function(err, doc) {
+        if (err) {
             res.status(500).send(err);
-        }
-        if(docs){
-            docs.forEach(function(doc) {
-                var item = doc;
-                item.id = item._id;
-                item.rev = item._rev;
-                response.supplier = item;
-            });
+        } else {
+            console.log('Retrieved ' + id + ' supplier by ID');
+            res.status(200);
+            var response = {
+                id: id,
+                type: doc.type,
+                name: doc.name,
+                tradingName: doc.tradingName,
+                tradingAddress: doc.tradingAddress,
+                returnsAddress: doc.returnsAddress,
+                contactName: doc.contactName,
+                contactEmail: doc.contactEmail,
+                contactNumber: doc.contactNumber,
+                status: doc.status,
+                terminated: doc.terminated,
+                stock: doc.stock,
+                transactionHistory: doc.transactionHistory
+            };
 
-            res.status(200).send(response);
-        }else{
-            res.status(200).send([]);
+            res.json(response);
         }
     });
 };
@@ -66,9 +69,22 @@ exports.getAll = function(req, res){
         }
         if(docs){
             docs.forEach(function(doc) {
-                var item = doc;
-                item.id = item._id;
-                item.rev = item._rev;
+                var item = {
+                    id: doc._id,
+                    type: doc.type,
+                    name: doc.name,
+                    tradingName: doc.tradingName,
+                    tradingAddress: doc.tradingAddress,
+                    returnsAddress: doc.returnsAddress,
+                    contactName: doc.contactName,
+                    contactEmail: doc.contactEmail,
+                    contactNumber: doc.contactNumber,
+                    status: doc.status,
+                    terminated: doc.terminated,
+                    stock: doc.stock,
+                    transactionHistory: doc.transactionHistory
+                };
+
                 response.suppliers.push(item);
             });
 

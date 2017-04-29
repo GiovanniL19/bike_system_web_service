@@ -1,8 +1,7 @@
 var	cradle 		= require('cradle'),
     path        = require('path');
 
-var db = new(cradle.Connection)().database('bikesystem');
-
+var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
 
 /*
  * POST
@@ -27,16 +26,17 @@ exports.save = function(req, res){
  */
 exports.get = function(req, res){
     var id = req.param("id");
-    var response = {
-        group: null
-    }
 
     db.get(id, function(err, doc) {
         if (err) {
             res.status(500).send(err);
         } else {
-            response.group = doc;
-            response.group.id = doc._id;
+            var response = {
+                id: id,
+                type: doc.type,
+                name: doc.name,
+                items: doc.items
+            };
 
             console.log('Retrieved ' + id + ' group by ID');
             res.status(200).send(response);
@@ -59,9 +59,13 @@ exports.getAll = function(req, res){
         }
         if(docs){
             docs.forEach(function(doc) {
-                var item = doc;
-                item.id = item._id;
-                item.rev = item._rev;
+                var item = {
+                    id: doc._id,
+                    type: doc.type,
+                    name: doc.name,
+                    items: doc.items
+                };
+
                 response.groups.push(item);
             });
 

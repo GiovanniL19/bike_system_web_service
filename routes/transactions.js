@@ -1,8 +1,36 @@
 var	cradle 		= require('cradle'),
     path        = require('path');
 
-var db = new(cradle.Connection)().database('bikesystem');
+var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
 
+/*
+* GET Production Orders
+ */
+exports.getProductionOrders = function(req, res){
+    var response = {
+        transactions:[]
+    };
+
+    db.view('transactions/transactionsByProduction', {include_docs: true}, function (err, docs) {
+        if(err){
+            console.log(err);
+            res.status(500).send(err);
+        }
+        if(docs){
+            docs.forEach(function(doc) {
+                var item = doc.data;
+                item.id = doc._id;
+
+                item.rev = doc._rev;
+                response.transactions.push(item);
+            });
+
+            res.status(200).send(response);
+        }else{
+            res.status(200).send([]);
+        }
+    });
+};
 
 /*
  * POST
@@ -29,13 +57,13 @@ exports.get = function(req, res){
     var id = req.param("id");
     var response = {
         transaction: null
-    }
+    };
 
     db.get(id, function(err, doc) {
         if (err) {
             res.status(500).send(err);
         } else {
-            response.transaction = doc;
+            response.transaction = doc.data;
             response.transaction.id = doc._id;
 
             console.log('Retrieved ' + id + ' transaction by ID');
@@ -52,24 +80,60 @@ exports.getAll = function(req, res){
         transactions: []
     };
 
-    db.view('transactions/transactionsById', {include_docs: true}, function (err, docs) {
-        if(err){
-            console.log(err);
-            res.status(500).send(err);
-        }
-        if(docs){
-            docs.forEach(function(doc) {
-                var item = doc;
-                item.id = item._id;
-                item.rev = item._rev;
-                response.transactions.push(item);
-            });
+    if(req.query.transactionID != undefined){
+        db.get(req.query.transactionID, function(err, doc) {
+            if (err) {
+                res.status(500).send(err);
+            } else {
 
-            res.status(200).send(response);
-        }else{
-            res.status(200).send([]);
-        }
-    });
+                var transaction = doc.data;
+                transaction.id = doc._id;
+
+                console.log('Retrieved ' + req.query.transactionID + ' transaction by ID');
+                res.status(200).send(transaction);
+            }
+        });
+    }else if(req.query.awaitingMaterials != undefined){
+        db.view('transactions/transactionsByAwaitingMaterials', {include_docs: true}, function (err, docs) {
+            if(err){
+                console.log(err);
+                res.status(500).send(err);
+            }
+            if(docs){
+                docs.forEach(function(doc) {
+                    var item = doc.data;
+                    item.id = doc._id;
+
+                    item.rev = doc._rev;
+                    response.transactions.push(item);
+                });
+
+                res.status(200).send(response);
+            }else{
+                res.status(200).send([]);
+            }
+        });
+    }else{
+        db.view('transactions/transactionsById', {include_docs: true}, function (err, docs) {
+            if(err){
+                console.log(err);
+                res.status(500).send(err);
+            }
+            if(docs){
+                docs.forEach(function(doc) {
+                    var item = doc.data;
+                    item.id = doc._id;
+
+                    item.rev = doc._rev;
+                    response.transactions.push(item);
+                });
+
+                res.status(200).send(response);
+            }else{
+                res.status(200).send([]);
+            }
+        });
+    }
 };
 
 /*
@@ -82,8 +146,12 @@ exports.update = function(req, res){
         if (err) {
             res.status(500).send(err);
         } else {
-            req.body.transaction.type = "transaction";
-            db.save(id, req.body.transaction, function(err, dbRes) {
+
+            var body = {
+                data : req.body.transaction
+            };
+
+            db.save(id, body, function(err, dbRes) {
                 if (err) {
                     console.log('Could not update');
                     console.log(err);
