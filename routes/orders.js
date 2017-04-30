@@ -12,7 +12,7 @@ exports.getProductionOrders = function(req, res){
         transactions:[]
     };
 
-    db.view('orders/ordersByInProduction', {include_docs: true}, function (err, docs) {
+    db.view('orders/ordersById', {include_docs: true}, function (err, docs) {
         if(err){
             console.log(err);
             res.status(500).send(err);
