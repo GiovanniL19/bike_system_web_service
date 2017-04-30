@@ -3,34 +3,6 @@ var	cradle 		= require('cradle'),
 
 var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
 
-/*
-* GET Production Orders
- */
-exports.getProductionOrders = function(req, res){
-    var response = {
-        transactions:[]
-    };
-
-    db.view('transactions/transactionsByProduction', {include_docs: true}, function (err, docs) {
-        if(err){
-            console.log(err);
-            res.status(500).send(err);
-        }
-        if(docs){
-            docs.forEach(function(doc) {
-                var item = doc.data;
-                item.id = doc._id;
-
-                item.rev = doc._rev;
-                response.transactions.push(item);
-            });
-
-            res.status(200).send(response);
-        }else{
-            res.status(200).send([]);
-        }
-    });
-};
 
 /*
  * POST

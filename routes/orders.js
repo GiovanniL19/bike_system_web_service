@@ -5,6 +5,35 @@ var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}
 
 
 /*
+ * GET Production Orders
+ */
+exports.getProductionOrders = function(req, res){
+    var response = {
+        transactions:[]
+    };
+
+    db.view('orders/ordersByInProduction', {include_docs: true}, function (err, docs) {
+        if(err){
+            console.log(err);
+            res.status(500).send(err);
+        }
+        if(docs){
+            docs.forEach(function(doc) {
+                var item = doc.data;
+                item.id = doc._id;
+
+                item.rev = doc._rev;
+                response.transactions.push(item);
+            });
+
+            res.status(200).send(response);
+        }else{
+            res.status(200).send([]);
+        }
+    });
+};
+
+/*
  * POST
  */
 exports.save = function(req, res){
@@ -51,25 +80,40 @@ exports.getAll = function(req, res){
     var response = {
         orders: []
     };
-    db.view('orders/ordersById', {include_docs: true}, function (err, docs) {
-        if(err){
-            console.log(err);
-            res.status(500).send(err);
-        }
-        if(docs){
-            docs.forEach(function(doc) {
+
+    if(req.query.orderID != undefined){
+        db.get(req.query.orderID, function(err, doc) {
+            if (err) {
+                res.status(500).send(err);
+            } else {
+
                 var item = doc.data;
                 item.id = doc._id;
+                item._rev = doc._rev;
+                console.log('Retrieved ' + req.query.orderID + ' order by ID');
+                res.status(200).send(item);
+            }
+        });
+    }else {
+        db.view('orders/ordersByAwaitingMaterials', {include_docs: true}, function (err, docs) {
+            if(err){
+                console.log(err);
+                res.status(500).send(err);
+            }
+            if(docs){
+                docs.forEach(function(doc) {
+                    var item = doc.data;
+                    item.id = doc._id;
+                    item._rev = doc._rev;
+                    response.orders.push(item);
+                });
 
-                item.rev = doc._rev;
-                response.orders.push(item);
-            });
-
-            res.status(200).send(response);
-        }else{
-            res.status(200).send([]);
-        }
-    });
+                res.status(200).send(response);
+            }else{
+                res.status(200).send([]);
+            }
+        });
+    }
 };
 
 /*
@@ -78,32 +122,26 @@ exports.getAll = function(req, res){
 exports.update = function(req, res){
     var id = req.param('id');
 
-    db.get(id, function(err, doc) {
+    var body = {
+        id: req.body.order.id,
+        data: req.body.order
+    };
+
+    db.save(id, body, function(err, dbRes) {
         if (err) {
+            console.log('Could not update');
+            console.log(err);
             res.status(500).send(err);
         } else {
-
-            var body = {
-                data : req.body.order
+            console.log(id + ' has been updated');
+            var response = {
+                order: null
             };
 
-            db.save(id, body, function(err, dbRes) {
-                if (err) {
-                    console.log('Could not update');
-                    console.log(err);
-                    res.status(500).send(err);
-                } else {
-                    console.log(id + ' has been updated');
-                    var response = {
-                        order: null
-                    };
+            response.order = req.body.order;
+            response.order.id = id;
 
-                    response.order = req.body.order;
-                    response.order.id = id;
-
-                    res.status(200).send(response);
-                }
-            });
+            res.status(200).send(response);
         }
     });
 };

@@ -51,7 +51,6 @@ app.get('/transactions/:id', transactions.get);
 app.get('/transactions', transactions.getAll);
 app.put('/transactions/:id', transactions.update);
 app.delete('/transactions/:id', transactions.delete);
-app.get('/getProductionOrders', transactions.getProductionOrders);
 
 //Manifests
 app.post('/manifests', manifests.save);
@@ -66,6 +65,7 @@ app.get('/orders/:id', orders.get);
 app.get('/orders', orders.getAll);
 app.put('/orders/:id', orders.update);
 app.delete('/orders/:id', orders.delete);
+app.get('/getProductionOrders', orders.getProductionOrders);
 
 //Quotes
 app.post('/quotes', transactions.save);

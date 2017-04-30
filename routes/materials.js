@@ -33,6 +33,7 @@ exports.get = function(req, res){
         } else {
             var response = {
                 id: id,
+                _rev: doc._rev,
                 type: doc.type,
                 barcode: doc.barcode,
                 name: doc.name,
@@ -45,8 +46,6 @@ exports.get = function(req, res){
                 trade: doc.trade,
                 retail: doc.retail,
                 leadTime: doc.leadTime,
-                group: doc.group,
-                supplier: doc.supplier,
                 bikes: doc.bikes
             };
 
@@ -75,6 +74,7 @@ exports.getAll = function(req, res){
                 docs.forEach(function(doc) {
                     var item = {
                         id: doc._id,
+                        _rev: doc._rev,
                         type: doc.type,
                         barcode: doc.barcode,
                         name: doc.name,
@@ -87,8 +87,6 @@ exports.getAll = function(req, res){
                         trade: doc.trade,
                         retail: doc.retail,
                         leadTime: doc.leadTime,
-                        group: doc.group,
-                        supplier: doc.supplier,
                         bikes: doc.bikes
                     };
 
@@ -122,8 +120,6 @@ exports.getAll = function(req, res){
                         trade: doc.trade,
                         retail: doc.retail,
                         leadTime: doc.leadTime,
-                        group: doc.group,
-                        supplier: doc.supplier,
                         bikes: doc.bikes
                     };
 
