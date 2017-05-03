@@ -1,7 +1,7 @@
 var	cradle 		= require('cradle'),
     path        = require('path');
 
-var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
+var db = new(cradle.Connection)('http://o.tcp.eu.ngrok.io', 14725).database('bikesystem');
 
 
 /*

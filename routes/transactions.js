@@ -1,7 +1,7 @@
 var	cradle 		= require('cradle'),
     path        = require('path');
 
-var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
+var db = new(cradle.Connection)('http://o.tcp.eu.ngrok.io', 14725).database('bikesystem');
 
 
 /*
@@ -52,7 +52,27 @@ exports.getAll = function(req, res){
         transactions: []
     };
 
-    if(req.query.transactionID != undefined){
+    if(req.query.order != undefined){
+        db.view('orders/ordersById', {include_docs: true}, function (err, docs) {
+            if(err){
+                console.log(err);
+                res.status(500).send(err);
+            }
+            if(docs){
+                docs.forEach(function(doc) {
+                    var item = doc.data;
+                    item.id = doc._id;
+
+                    item.rev = doc._rev;
+                    response.transactions.push(item);
+                });
+
+                res.status(200).send(response);
+            }else{
+                res.status(200).send([]);
+            }
+        });
+    }else if(req.query.transactionID != undefined){
         db.get(req.query.transactionID, function(err, doc) {
             if (err) {
                 res.status(500).send(err);

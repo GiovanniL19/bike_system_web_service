@@ -3,8 +3,6 @@ var express 	   = require('express'),
     path           = require('path'),
     bodyParser     = require('body-parser');
 
-var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
-
 var transactions = require('./routes/transactions.js');
 var quotes = require('./routes/quotes.js');
 var materials = require('./routes/materials.js');

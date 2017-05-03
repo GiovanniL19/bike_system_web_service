@@ -1,7 +1,7 @@
 var	cradle 		= require('cradle'),
     path        = require('path');
 
-var db = new(cradle.Connection)({auth:{username:"admin", password:"9999567890"}}).database('bikesystem');
+var db = new(cradle.Connection)('http://o.tcp.eu.ngrok.io', 14725).database('bikesystem');
 
 
 /*
@@ -12,7 +12,7 @@ exports.getProductionOrders = function(req, res){
         transactions:[]
     };
 
-    db.view('orders/ordersById', {include_docs: true}, function (err, docs) {
+    db.view('orders/ordersByIdForProduction', {include_docs: true}, function (err, docs) {
         if(err){
             console.log(err);
             res.status(500).send(err);
@@ -21,7 +21,6 @@ exports.getProductionOrders = function(req, res){
             docs.forEach(function(doc) {
                 var item = doc.data;
                 item.id = doc._id;
-
                 item.rev = doc._rev;
                 response.transactions.push(item);
             });
@@ -66,7 +65,7 @@ exports.get = function(req, res){
         } else {
             response.order = doc.data;
             response.order.id = doc._id;
-
+            response.order.rev = doc._rev;
             console.log('Retrieved ' + id + ' order by ID');
             res.status(200).send(response);
         }
@@ -123,9 +122,15 @@ exports.update = function(req, res){
     var id = req.param('id');
 
     var body = {
-        id: req.body.order.id,
+        _id: req.body.order.id,
+        _rev: req.body.order._rev,
         data: req.body.order
     };
+
+    delete body.data.id;
+    delete body.data._id;
+    delete body.data.rev;
+    delete body.data._rev;
 
     db.save(id, body, function(err, dbRes) {
         if (err) {
